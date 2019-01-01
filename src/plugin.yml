@@ -1,0 +1,28 @@
+name: FroobPermissions
+main: com.froobworld.froobpermissions.FroobPermissions
+author: froobynooby
+version: 3.2.0
+api-version: 1.13
+description: >
+             Groups and permissions.
+commands:
+   setgroup:
+    description: Change a player's group.
+   listgroups:
+    description: List all groups.
+   group:
+    description: Modify a group.
+   whois:
+    description: Lookup a player's group.
+
+
+
+
+
+
+
+
+
+
+
+
