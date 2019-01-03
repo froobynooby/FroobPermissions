@@ -1,13 +1,13 @@
 package com.froobworld.froobpermissions.data;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-
+import com.froobworld.frooblib.utils.TimeUtils;
+import com.froobworld.froobpermissions.managers.GroupManager;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import com.froobworld.froobpermissions.managers.GroupManager;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class Group {
 
@@ -22,6 +22,8 @@ public class Group {
     private ArrayList<Group> inherits;
     private String discordEquiv;
 
+    private Group nextGroup;
+    private Long timeUntilNextGroup;
 
     public Group(GroupManager manager, File file) {
         this.manager = manager;
@@ -43,6 +45,11 @@ public class Group {
             permissions.add(string.toLowerCase());
         }
         discordEquiv = config.getString("discord-equivalent-role");
+
+        String timeString = config.getString("auto-promote.time");
+        if (timeString != null) {
+            timeUntilNextGroup = TimeUtils.parseTime(timeString);
+        }
     }
 
     public void addInheritance() {
@@ -56,6 +63,8 @@ public class Group {
                 inherits.add(group);
             }
         }
+
+        nextGroup = manager.getGroup(config.getString("auto-promote.group"));
     }
 
     public void saveToFile() {
@@ -155,6 +164,16 @@ public class Group {
         }
 
         return inheritInherits;
+    }
+
+    public Group getNextGroup() {
+
+        return nextGroup;
+    }
+
+    public Long getTimeUntilNextGroup() {
+
+        return timeUntilNextGroup;
     }
 
     @Override

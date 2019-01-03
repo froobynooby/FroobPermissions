@@ -1,5 +1,6 @@
 package com.froobworld.froobpermissions;
 
+import com.froobworld.froobbasics.FroobBasics;
 import com.froobworld.frooblib.FroobPlugin;
 import com.froobworld.frooblib.uuid.UUIDManager;
 import com.froobworld.froobpermissions.commands.GroupCommand;
@@ -21,6 +22,7 @@ public class FroobPermissions extends FroobPlugin {
     private GroupManager groupManager;
     private PlayerManager playerManager;
     private DiscordListener discordListener;
+    private com.froobworld.froobbasics.managers.PlayerManager fbPlayerManager;
 
     public static Plugin getPlugin() {
 
@@ -59,7 +61,15 @@ public class FroobPermissions extends FroobPlugin {
         uuidManager = uuidManager();
         groupManager = new GroupManager();
         registerManager(groupManager);
-        playerManager = new PlayerManager(groupManager);
+
+        FroobBasics froobBasics = (FroobBasics) getServer().getPluginManager().getPlugin("FroobBasics");
+        if (froobBasics != null) {
+            fbPlayerManager = froobBasics.getPlayerManager();
+        } else {
+            fbPlayerManager = null;
+        }
+
+        playerManager = new PlayerManager(groupManager, fbPlayerManager);
         registerManager(playerManager);
         playerManager.updateAllPlayers();
         discordListener = new DiscordListener(playerManager);

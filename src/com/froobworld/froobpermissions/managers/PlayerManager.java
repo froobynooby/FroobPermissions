@@ -2,6 +2,7 @@ package com.froobworld.froobpermissions.managers;
 
 import com.froobworld.frooblib.data.Manager;
 import com.froobworld.frooblib.data.Storage;
+import com.froobworld.frooblib.data.TaskManager;
 import com.froobworld.frooblib.utils.PageUtils;
 import com.froobworld.frooblib.uuid.UUIDManager;
 import com.froobworld.frooblib.uuid.UUIDManager.UUIDData;
@@ -23,16 +24,19 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class PlayerManager extends Manager {
+public class PlayerManager extends TaskManager {
     private Storage storage;
 
     private GroupManager groupManager;
+    private com.froobworld.froobbasics.managers.PlayerManager fbPlayerManager;
 
     private HashMap<Player, PermissionAttachment> attachments;
     private HashMap<UUID, Playerdata> playerdata;
 
-    public PlayerManager(GroupManager groupManager) {
+    public PlayerManager(GroupManager groupManager, com.froobworld.froobbasics.managers.PlayerManager fbPlayerManager) {
+        super(FroobPermissions.getPlugin());
         this.groupManager = groupManager;
+        this.fbPlayerManager = fbPlayerManager;
     }
 
 
@@ -42,6 +46,14 @@ public class PlayerManager extends Manager {
         playerdata = new HashMap<UUID, Playerdata>();
 
         storage = new Storage(FroobPermissions.getPlugin().getDataFolder().getPath() + "/playerdata");
+
+        addTask(0, 1200, new Runnable() {
+
+            @Override
+            public void run() {
+                task();
+            }
+        });
     }
 
     public boolean loadPlayerdata(UUID uuid) {
@@ -167,6 +179,23 @@ public class PlayerManager extends Manager {
         }
 
         return data;
+    }
+
+    private void task() {
+        if (fbPlayerManager == null) {
+            return;
+        }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            Playerdata data = getPlayerdata(player);
+            long firstJoined = fbPlayerManager.getPlayerdata(player).getFirstJoined();
+
+            if(data.getGroup().getNextGroup() != null && data.getGroup().getTimeUntilNextGroup() != null) {
+                if(System.currentTimeMillis() - firstJoined >= data.getGroup().getTimeUntilNextGroup()) {
+                    data.setGroup(data.getGroup().getNextGroup());
+                    Bukkit.broadcastMessage((org.bukkit.ChatColor.YELLOW + player.getName() + " is now in group " + data.getGroup().getName() + "."));
+                }
+            }
+        }
     }
 
 }

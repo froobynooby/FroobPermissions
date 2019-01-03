@@ -5,6 +5,7 @@ version: 3.2.0
 api-version: 1.13
 description: >
              Groups and permissions.
+softdepend: [FroobBasics]
 commands:
    setgroup:
     description: Change a player's group.
